@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+
+		<title>TradingView Advanced Charts demo</title>
+
+		<!-- Fix for iOS Safari zooming bug -->
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+
+		<script type="text/javascript" src="charting_library/charting_library.standalone.js"></script>
+		<script type="text/javascript" src="datafeeds/udf/dist/bundle.js"></script>
+
+		<script type="text/javascript">
+
+			function initOnReady() {
+
+        const configurationData = {
+          // Represents the resolutions for bars supported by your datafeed
+          supported_resolutions: ['1D', '1W', '1M'],
+          // The `exchanges` arguments are used for the `searchSymbols` method if a user selects the exchange
+          exchanges: [
+            { value: 'Bitfinex', name: 'Bitfinex', desc: 'Bitfinex'},
+            { value: 'Kraken', name: 'Kraken', desc: 'Kraken bitcoin exchange'},
+          ],
+          // The `symbols_types` arguments are used for the `searchSymbols` method if a user selects this symbol type
+          symbols_types: [
+            { name: 'crypto', value: 'crypto'}
+          ]
+
+        };
+
+        const feed = {
+          onReady: (callback) => {
+            console.log('[onReady]: Method call');
+            setTimeout(() => callback(configurationData));
+          },
+          
+          searchSymbols: async (userInput, exchange, symbolType, onResultReadyCallback) => {
+            console.log('[searchSymbols]: Method call');
+            const url = `https://mtr-demo-prod.match-trader.com/market-data-api/8e9ed851-1e5e-479b-aa19-bade6a67d1d5/api/trading-view/search?query=${userInput}`
+
+            const response = await fetch(url)
+            const symbolItems = await response.json()
+
+            onResultReadyCallback(symbolItems);
+          },
+          
+          resolveSymbol: async (symbolName, onSymbolResolvedCallback, onResolveErrorCallback, extension) => {
+            console.log('[resolveSymbol]: Method call', symbolName);
+            const url = `https://mtr-demo-prod.match-trader.com/market-data-api/8e9ed851-1e5e-479b-aa19-bade6a67d1d5/api/trading-view/search?query=${symbolName}`
+
+            const response = await fetch(url)
+            const symbols = await response.json()
+
+            const symbolItem = symbols.find(symbol => symbol.full_name === symbolName);
+
+            if (!symbolItem) {
+                onResolveErrorCallback('Cannot resolve symbol');
+                return;
+            }
+            const symbolInfo = {
+              ticker: symbolItem.full_name,
+              name: symbolItem.symbol,
+              description: symbolItem.description,
+              type: symbolItem.type,
+              session: '24x7',
+              timezone: 'Etc/UTC',
+              exchange: symbolItem.exchange,
+              minmov: 1,
+              pricescale: 100,
+              supported_resolutions: configurationData.supported_resolutions,
+            };
+            onSymbolResolvedCallback(symbolInfo);
+          },
+          
+          getBars: async (symbolInfo, resolution, periodParams, onHistoryCallback, onErrorCallback) => {
+            console.log('[getBars]: Method call', symbolInfo);
+            const { from, to, firstDataRequest, countBack } = periodParams;
+            try {
+                const url = `https://mtr-demo-prod.match-trader.com/market-data-api/8e9ed851-1e5e-479b-aa19-bade6a67d1d5/api/trading-view/history?symbol=${symbolInfo.ticker}&resolution=${resolution}&from=${from}&to=${from}&shouldRetrieveOnlyFromCache=${firstDataRequest}&countback=${countBack}`
+                const fetchResponse = await fetch(url)
+                const response = await fetchResponse.json()
+
+                let bars = []
+
+
+                if (!response || response.s !== 'ok') {
+                  meta.noData = true
+                  meta.nextTime = response?.nextTime
+                } else {
+
+                  const ohlPresent = response.o !== undefined
+                  const volumePresent = response.v !== undefined
+
+                  for (let i = 0; i < response.t.length; ++i) {
+                    const barValue = {
+                      time: response.t[i],
+                      close: parseFloat(response.c[i]),
+                      open: parseFloat(response.c[i]),
+                      high: parseFloat(response.c[i]),
+                      low: parseFloat(response.c[i]),
+                      isBarClosed: true,
+                      isLastBar: false
+
+                    }
+
+                    if (ohlPresent) {
+                      barValue.open = parseFloat(response.o[i])
+                      barValue.high = parseFloat(response.h[i])
+                      barValue.low = parseFloat(response.l[i])
+                    }
+                    if (volumePresent) {
+                      barValue.volume = parseFloat(response.v[i])
+                    }
+                    bars = [...bars, barValue]
+                  }
+                } 
+                bars[bars.length - 1].isLastBar = true
+
+                onHistoryCallback(bars, { noData: false });
+            } catch (error) {
+                onErrorCallback(error);
+            }
+        },
+          
+          subscribeBars: (symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
+            console.log('[subscribeBars]: Method call with subscriberUID:', subscriberUID);
+
+          },
+          
+          unsubscribeBars: (subscriberUID) => {
+            console.log('[unsubscribeBars]: Method call with subscriberUID:', subscriberUID);
+          },
+        }
+
+				var widget = window.tvWidget = new TradingView.widget({
+          symbol: 'EURUSD',
+          interval: '1D',                       
+          fullscreen: true,                      
+          container: 'tv_chart_container',
+          datafeed: feed,
+          library_path: 'charting_library/'
+				});
+				window.frames[0].focus();
+			};
+
+			window.addEventListener('DOMContentLoaded', initOnReady, false);
+		</script>
+
+	</head>
+
+	<body style="margin:0px;">
+		<div id="tv_chart_container"></div>
+	</body>
+
+</html>
