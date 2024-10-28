@@ -1,2 +1,4 @@
-charting_library/*
-datafeeds/*
+public/static/*
+node_modules/*
+
+.next/*

@@ -1,28 +1,22 @@
 {
+  "name": "charting-library-nextjs",
+  "version": "1.0.0",
   "private": true,
-  "main": "charting_library/charting_library.cjs.js",
-  "exports": {
-    ".": {
-      "types": "./charting_library.d.ts",
-      "import": "./charting_library/charting_library.esm.js",
-      "require": "./charting_library/charting_library.cjs.js"
-    },
-    "./datafeeds/udf": {
-      "types": "./datafeeds/udf/types.d.ts",
-      "default": "./datafeeds/udf/lib/udf-compatible-datafeed.js"
-    }
+  "engines": {
+    "node": ">=22.0.0"
   },
-  "module": "charting_library/charting_library.esm.js",
-  "files": [
-    "charting_library/",
-    "datafeeds/",
-    "/*.d.ts"
-  ],
-  "bugs": {
-    "url": "https://github.com/tradingview/charting_library/issues"
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "PORT=3001 next start"
   },
-  "homepage": "https://www.tradingview.com/charting-library-docs",
-  "name": "charting_library",
-  "version": "28.1.0",
-  "types": "charting_library.d.ts"
+  "dependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "~5.5.4"
+  }
 }
