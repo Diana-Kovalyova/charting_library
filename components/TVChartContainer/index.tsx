@@ -12,14 +12,6 @@ export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) =
 		const widgetOptions: ChartingLibraryWidgetOptions = {
 			symbol: props.symbol,
 			datafeed: datafeed,
-      // datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
-			// 	"https://demo_feed.tradingview.com",
-			// 	undefined,
-			// 	{
-			// 		maxResponseLength: 1000,
-			// 		expectedOrder: "latestFirst",
-			// 	}
-			// ),
 			interval: props.interval as ResolutionString,
 			container: chartContainerRef.current,
 			library_path: props.library_path,
