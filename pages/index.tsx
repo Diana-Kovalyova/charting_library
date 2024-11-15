@@ -4,7 +4,7 @@ import Script from "next/script";
 import { ChartingLibraryWidgetOptions, ResolutionString } from "@/charting_library";
 
 const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
-  symbol: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-eth_USD",
+  symbol: "0x0f1cfd0bb452db90a3bfc0848349463010419ab2-base_USD",
   interval: "5" as ResolutionString,
   library_path: "/static/charting_library/",
   locale: "en",

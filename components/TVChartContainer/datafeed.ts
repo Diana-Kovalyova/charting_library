@@ -17,7 +17,11 @@ const getChainIdByNetwork: CatList  = {
   'arbitrum': 42161,
   'polygon': 137
 }
+// https://api-stage.dex.guru/v1/tradingview
+// const domain = 'https://api-stage.dex.guru'
+const f = 'api-stage.dex.guru'
 
+//1731639300
 
 export const datafeed = {
   onReady: (callback: OnReadyCallback) => {
@@ -27,7 +31,7 @@ export const datafeed = {
 
   searchSymbols: async (userInput: string, exchange: string, symbolType: string, onResultReadyCallback: SearchSymbolsCallback )=> {
     console.log('[searchSymbols]: Method call');
-    const url = `https://api.dex.guru/v1/tradingview/search?query=${userInput.toUpperCase()}&limit=30&type=${symbolType}&exchange=${exchange}`
+    const url = `https://${f}/v1/tradingview/search?query=${userInput.toUpperCase()}&limit=30&type=${symbolType}&exchange=${exchange}`
     const response = await fetch(url)
     const symbolItems = await response.json()
     onResultReadyCallback(symbolItems);
@@ -35,7 +39,7 @@ export const datafeed = {
 
   resolveSymbol: async (symbolName: string, onSymbolResolvedCallback: ResolveCallback, onResolveErrorCallback: DatafeedErrorCallback ) => {
     console.log('[resolveSymbol]: Method call', symbolName);
-    const url = `https://api.dex.guru/v1/tradingview/search?query=${symbolName}`
+    const url = `https://${f}/v1/tradingview/search?query=${symbolName}`
 
     const response = await fetch(url)
     const symbols = await response.json()
@@ -67,7 +71,7 @@ export const datafeed = {
     const { from, firstDataRequest, countBack } = periodParams;
     try {
         const to = new Date().getTime() < 1000 * periodParams.to ? Math.floor(new Date().getTime()/ 1000) : periodParams.to
-        const url = `https://api.dex.guru/v1/tradingview/history?symbol=${symbolInfo.ticker}&resolution=${resolution}&from=${from}&to=${to}`
+        const url = `https://${f}/v1/tradingview/history?symbol=${symbolInfo.ticker}&resolution=${resolution}&from=${from}&to=${to}`
         const fetchResponse = await fetch(url)
         const response = await fetchResponse.json()
 
@@ -99,6 +103,7 @@ export const datafeed = {
               bars = [...bars, barValue]
           }
         } 
+        console.log(bars)
         onHistoryCallback(bars, { noData: false });
     } catch (error) {
         onErrorCallback('');
@@ -107,8 +112,8 @@ export const datafeed = {
 
   subscribeBars: (symbolInfo: LibrarySymbolInfo, resolution: ResolutionString, onTick: SubscribeBarsCallback, listenerGuid: string) => {
     console.log('[subscribeBars]: Method call with subscriberUID:', listenerGuid);
-
-    const ws = new WebSocket('wss://ws.dex.guru/v1/ws/channels')
+    const url = `wss://ws-${f}/v1/ws/channels`
+    const ws = new WebSocket(url)
 
     const interval = parseInt(resolution, 10) * 60
 
